@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Nova+Square&display=swap');
+
+
+@font-face {
+    font-family: "Proxima";
+    src: url('/public/fonts/Fontspring-DEMO-proximanova-medium.otf');
+
+}
+  
+@font-face {
+    font-family: "ProximaBold";
+    src: url('/public/fonts/Fontspring-DEMO-proximanovacond-bold.otf');
+
+}
+  
