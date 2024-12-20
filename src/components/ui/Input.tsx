@@ -4,6 +4,7 @@ import { cn } from '../../utils/cn';
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ReactNode;
   error?: string;
+  label?: string;
 }
 
 export const Input: React.FC<InputProps> = ({

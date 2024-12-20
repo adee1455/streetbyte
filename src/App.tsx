@@ -8,6 +8,7 @@ import { Profile } from './pages/Profile';
 import { VendorDetails } from './pages/VendorDetails';
 import Feed from './pages/Feed';
 import Videos from './pages/Videos';
+import { VendorForm } from './components/vendor/VendorForm';
 export default function App() {
   return (
     <Router>
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/vendor/:id" element={<VendorDetails />} />
         <Route path="/feed" element={<Feed />} />
         <Route path="/videos" element={<Videos />} />
+        <Route path="/form" element={<VendorForm />} />
       </Routes>
       </div>
     </Router>

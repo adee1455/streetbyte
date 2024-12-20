@@ -6,6 +6,7 @@ import { CategoryScroll } from '../components/home/CategoryScroll';
 import { VendorCard } from '../components/home/VendorCard';
 import { Navigation } from '../components/layout/Navigation';
 import { LocationHeader } from '../components/home/LocationHeader';
+import { FloatingActionButton } from '../components/home/FloatingActionButton';
 
 const mockVendors = [
   {
@@ -15,6 +16,7 @@ const mockVendors = [
     address: 'Food Street, Downtown',
     cuisineType: ['Mexican', 'Street Food'],
     rating: 4.5,
+    pno: 8767564998,
     images: ['https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&q=80&w=800'],
     menu: [],
     reviews: []
@@ -26,6 +28,7 @@ const mockVendors = [
     address: 'China Town, City Center',
     cuisineType: ['Chinese', 'Dim Sum'],
     rating: 4.8,
+    pno: 9876543210,
     images: ['https://images.unsplash.com/photo-1455279032140-49a4bf46f343?auto=format&fit=crop&q=80&w=800'],
     menu: [],
     reviews: []
@@ -65,7 +68,7 @@ export const Home = () => {
           ))}
         </div>
       </div>
-
+      <FloatingActionButton />
       <Navigation />
     </div>
   );

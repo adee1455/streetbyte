@@ -16,6 +16,7 @@ export interface Vendor {
   images: string[];
   menu: MenuItem[];
   reviews: Review[];
+  pno: number;
 }
 
 export interface MenuItem {
