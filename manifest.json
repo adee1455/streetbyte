@@ -1,6 +1,7 @@
 {
     "name": "Streetbyte",
     "short_name": "StreetByte",
+    "start_url": "/",
     "icons": [
       {
         "src": "jade.png",
