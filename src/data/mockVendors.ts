@@ -4,7 +4,11 @@ export interface Vendor {
   description: string;
   address: string;
   coordinates: { lat: number; lng: number };
+  hours: string;
   rating: number;
+  deliveryRating: number;
+  deliveryTime: string;
+  costForTwo: string;
   cuisine: string;
   features: {
     homeDelivery: boolean;
@@ -15,6 +19,7 @@ export interface Vendor {
   };
   images: string[];
   isVeg: boolean;
+  menu: MenuItem[];
 }
 
 export interface MenuItem {
