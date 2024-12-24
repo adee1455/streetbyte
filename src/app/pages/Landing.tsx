@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Menu } from 'lucide-react';
-import { LocationInput } from '../components/landing/LocationInput';
-import { FoodIllustration } from '../components/landing/FoodIllustration';
-import { LocationMap } from '../components/landing/LocationMap';
-import { Header } from '../components/Header';
+import { LocationInput } from '../../components/landing/LocationInput';
+import { FoodIllustration } from '../../components/landing/FoodIllustration';
+import { LocationMap } from '../../components/landing/LocationMap';
+import { Header } from '../../components/Header';
 
 export const Landing = () => {
   return (

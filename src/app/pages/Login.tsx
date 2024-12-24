@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
-import { SocialLogin } from '../components/auth/SocialLogin';
-import { EmailLogin } from '../components/auth/EmailLogin';
-import { Divider } from '../components/ui/Divider';
+import { useAuthStore } from '../../store/authStore';
+import { SocialLogin } from '../../components/auth/SocialLogin';
+import { EmailLogin } from '../../components/auth/EmailLogin';
+import { Divider } from '../../components/ui/Divider';
 
 export const Login = () => {
   const navigate = useNavigate();

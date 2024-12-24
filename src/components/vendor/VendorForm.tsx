@@ -3,30 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { Camera, MapPin, Info, PhoneCallIcon } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
+import { storage } from '../../lib/appwrite';
+import { ID } from 'appwrite';
 
 interface FormData {
   name: string;
   foodType: string;
   address: string;
+  rating: string;
   images: FileList | null;
   menu: FileList | null;
-  features: {
-    homeDelivery: boolean;
-    takeaway: boolean;
-    vegetarianOnly: boolean;
-    indoorSeating: boolean;
-    desserts: boolean;
-  };
-  coordinates: { lat: number | null; lng: number | null };
+  // features: {
+  //   homeDelivery: boolean;
+  //   takeaway: boolean;
+  //   vegetarianOnly: boolean;
+  //   indoorSeating: boolean;
+  //   desserts: boolean;
+  // };
   phoneNo: string;
   description: string;
 }
-
-const mapContainerStyle = {
-  width: "100%",
-  height: "400px",
-};
 
 export const VendorForm = () => {
   const navigate = useNavigate();
@@ -36,57 +32,17 @@ export const VendorForm = () => {
     address: '',
     images: null,
     menu: null,
-    features: {
-      homeDelivery: false,
-      takeaway: false,
-      vegetarianOnly: false,
-      indoorSeating: false,
-      desserts: false,
-    },
-    coordinates: { lat: null, lng: null },
+    rating: '',
     phoneNo: '',
     description: '',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
-  const [locationError, setLocationError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [imageNames, setImageNames] = useState<string[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [menuPreviews, setMenuPreviews] = useState<string[]>([]);
 
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: "AIzaSyDnFERa1oyGkz3C8hWtPWi0UGtx1iD1FxM", // Replace with your API key
-    libraries: ['places'], // Load the places library
-  });
+ 
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFormData((prevData) => ({
-            ...prevData,
-            coordinates: {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            },
-          }));
-          setLocationError(null);
-        },
-        (error) => {
-          console.error("Error fetching location: ", error);
-          setLocationError("Location permission denied. Please enable location services.");
-          setFormData((prevData) => ({
-            ...prevData,
-            coordinates: { lat: 28.6139, lng: 77.209 }, // Default to New Delhi
-          }));
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-    }
-  }, []);
-
+  
   const validateForm = () => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
@@ -100,7 +56,7 @@ export const VendorForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -110,16 +66,80 @@ export const VendorForm = () => {
     const newVendor = {
       id: Date.now().toString(),
       ...formData,
-      images: formData.images ? Array.from(formData.images).map(file => URL.createObjectURL(file)) : [],
-      menu: formData.menu ? Array.from(formData.menu).map(file => URL.createObjectURL(file)) : [],
     };
+
+    // Upload vendor images
+    const vendorImageUrls = await uploadImages(formData.images);
+    const menuImageUrls = await uploadImages(formData.menu);
+
+    // Insert vendor into the database
+    await insertVendor(newVendor, vendorImageUrls, menuImageUrls);
 
     localStorage.setItem('vendors', JSON.stringify([...existingVendors, newVendor]));
 
     navigate('/home');
   };
 
-  if (!isLoaded) return <div>Loading...</div>;
+  const uploadImages = async (files: FileList | null): Promise<string[]> => {
+    if (!files) return [];
+
+    const urls: string[] = [];
+    for (const file of Array.from(files)) {
+      try {
+        const response = await storage.createFile(
+          '676ab6de002caef140d0',
+          ID.unique(),
+          file
+        );
+        const url = response.$id;
+        urls.push(url);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        // Handle the error as needed (e.g., show a notification)
+      }
+    }
+    return urls;
+  };
+
+  const insertVendor = async (vendor: any, vendorImageUrls: string[], menuImageUrls: string[]) => {
+    // Insert vendor into the database
+    await fetch('/api/vendors', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(vendor),
+    });
+
+    // Insert vendor images
+    for (const url of vendorImageUrls) {
+      await fetch('/api/vendor-images', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          vendor_id: vendor.id,
+          image_url: url,
+        }),
+      });
+    }
+
+    // Insert menu images
+    for (const url of menuImageUrls) {
+      await fetch('/api/menu-images', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          vendor_id: vendor.id,
+          image_url: url,
+        }),
+      });
+    }
+  };
+
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-4 space-y-6">
@@ -264,27 +284,6 @@ export const VendorForm = () => {
         </div>
       )}
 
-      <div>
-      <h2 className='text-gray-700 py-3'>Select Food Outlet Location</h2>
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        zoom={14}
-        center={formData.coordinates.lat ? formData.coordinates : { lat: 28.6139, lng: 77.209 }}
-        onClick={(event) => {
-          setFormData({
-            ...formData,
-            coordinates: {
-              lat: event.latLng.lat(),
-              lng: event.latLng.lng(),
-            },
-          });
-        }}
-      >
-        {formData.coordinates.lat && formData.coordinates.lng && (
-          <Marker position={formData.coordinates} />
-        )}
-      </GoogleMap>
-      </div>
       <div className="flex justify-end space-x-4">
         <Button type="button" variant="outline" onClick={() => navigate('/home')}>
           Cancel

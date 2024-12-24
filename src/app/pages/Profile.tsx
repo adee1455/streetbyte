@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ProfileHeader } from '../components/profile/ProfileHeader';
-import { ProfileTabs } from '../components/profile/ProfileTabs';
-import { ReviewsTab } from '../components/profile/tabs/ReviewsTab';
-import { VendorsTab } from '../components/profile/tabs/VendorsTab';
-import { SettingsTab } from '../components/profile/tabs/SettingsTab';
-import { SupportTab } from '../components/profile/tabs/SupportTab';
+import { ProfileHeader } from '../../components/profile/ProfileHeader';
+import { ProfileTabs } from '../../components/profile/ProfileTabs';
+import { ReviewsTab } from '../../components/profile/tabs/ReviewsTab';
+import { VendorsTab } from '../../components/profile/tabs/VendorsTab';
+import { SettingsTab } from '../../components/profile/tabs/SettingsTab';
+import { SupportTab } from '../../components/profile/tabs/SupportTab';
 
 export const Profile = () => {
   const [activeTab, setActiveTab] = useState('reviews');

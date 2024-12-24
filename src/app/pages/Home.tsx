@@ -1,12 +1,12 @@
 import React from 'react';
 import { Search } from 'lucide-react';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
-import { CategoryScroll } from '../components/home/CategoryScroll';
-import { VendorCard } from '../components/home/VendorCard';
-import { Navigation } from '../components/layout/Navigation';
-import { LocationHeader } from '../components/home/LocationHeader';
-import { FloatingActionButton } from '../components/home/FloatingActionButton';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
+import { CategoryScroll } from '../../components/home/CategoryScroll';
+import { VendorCard } from '../../components/home/VendorCard';
+import { Navigation } from '../../components/layout/Navigation';
+import { LocationHeader } from '../../components/home/LocationHeader';
+import { FloatingActionButton } from '../../components/home/FloatingActionButton';
 
 const mockVendors = [
   {

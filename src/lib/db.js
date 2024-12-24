@@ -1,4 +1,3 @@
-
 const mysql = require('mysql2/promise');
 
 // Create a database connection pool
@@ -16,10 +15,13 @@ const pool = mysql.createPool({
 const query = async ({ query, values }) => {
   const connection = await pool.getConnection();
   try {
-    const [rows] = await connection.execute(query, values);
-    return rows;
-  } finally {
+    console.log("Db Connected");
+    const [results] = await connection.execute(query, values);
     connection.release();
+    return results;
+  } catch (error) {
+    console.log("Db not Connected");
+    throw Error(error.message);
   }
 };
 

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Star, MapPin, Clock, Phone, Navigation2, Camera, Heart, Share2, NotebookPen, PenSquareIcon, } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Navigation } from '../components/layout/Navigation';
-import { AddressSection } from '../components/vendor/AddressSection';
-import { ImageGallery } from '../components/vendor/ImageGallery';
-import { Modal } from '../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
+import { Navigation } from '../../components/layout/Navigation';
+import { AddressSection } from '../../components/vendor/AddressSection';
+import { ImageGallery } from '../../components/vendor/ImageGallery';
+import { Modal } from '../../components/ui/Modal';
 
 const mockVendor = {
   id: '1',
