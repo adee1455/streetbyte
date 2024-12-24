@@ -1,15 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
+import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
 
 interface AddressSectionProps {
   address: string;
-  coordinates?: { lat: number; lng: number };
 }
 
-export const AddressSection: React.FC<AddressSectionProps> = ({ address, coordinates }) => {
-  const mapUrl = coordinates 
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lng-0.01}%2C${coordinates.lat-0.01}%2C${coordinates.lng+0.01}%2C${coordinates.lat+0.01}&amp;layer=mapnik&amp;marker=${coordinates.lat}%2C${coordinates.lng}`
-    : `https://www.openstreetmap.org/export/embed.html?bbox=72.8%2C19.0%2C72.9%2C19.1&amp;layer=mapnik`;
+const mapContainerStyle = {
+  width: "100%",
+  height: "600px",
+};
+
+export const AddressSection: React.FC<AddressSectionProps> = ({ address }) => {
+  const [geocodeCoordinates, setGeocodeCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: "AIzaSyDnFERa1oyGkz3C8hWtPWi0UGtx1iD1FxM", // Replace with your API key
+  });
+
+  useEffect(() => {
+    const geocodeAddress = async () => {
+      if (address && typeof address === 'string' && address.trim() !== '') {
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ address }, (results, status) => {
+          if (status === "OK" && results[0]) {
+            const { lat, lng } = results[0].geometry.location;
+            setGeocodeCoordinates({ lat: lat(), lng: lng() });
+          } else {
+            console.error("Geocode was not successful for the following reason: " + status);
+          }
+        });
+      } else {
+        console.warn("Invalid address provided for geocoding.");
+      }
+    };
+
+    geocodeAddress();
+  }, [address]);
 
   return (
     <div className="bg-white shadow-sm mt-3">
@@ -19,18 +45,16 @@ export const AddressSection: React.FC<AddressSectionProps> = ({ address, coordin
           <MapPin className="w-5 h-5 text-gray-500 mt-1" />
           <p className="text-gray-700">{address}</p>
         </div>
-        <div className="h-48 rounded-lg overflow-hidden">
-          <iframe
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            scrolling="no"
-            marginHeight={0}
-            marginWidth={0}
-            src={mapUrl}
-            style={{ border: 0 }}
-            title="Restaurant Location"
-          />
+        <div className="h-52 focus:outline-none rounded-lg overflow-hidden">
+          {isLoaded && geocodeCoordinates && (
+            <GoogleMap
+              mapContainerStyle={mapContainerStyle}
+              zoom={14}
+              center={geocodeCoordinates}
+            >
+              <Marker position={geocodeCoordinates} />
+            </GoogleMap>
+          )}
         </div>
       </div>
     </div>

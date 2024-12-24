@@ -4,10 +4,13 @@ import { Star, MapPin, Clock, Phone, Navigation2, Camera, Heart, Share2, Noteboo
 import { Button } from '../components/ui/Button';
 import { Navigation } from '../components/layout/Navigation';
 import { AddressSection } from '../components/vendor/AddressSection';
+import { ImageGallery } from '../components/vendor/ImageGallery';
+import { Modal } from '../components/ui/Modal';
 
 const mockVendor = {
   id: '1',
   name: 'Street Taco Express',
+  foodType: 'Street Food',
   description: 'Authentic Mexican street tacos made with traditional recipes and fresh ingredients.',
   address: 'C6, Brijesh Society, Cidco, Nashik',
   pno: 8767564998,
@@ -29,16 +32,8 @@ const mockVendor = {
     'https://images.unsplash.com/photo-1562059390-a761a084768e?auto=format&fit=crop&q=80&w=800'
   ],
   menu: [
-    { 
-      id: '1', 
-      name: 'Carne Asada Taco', 
-      price: 3.50, 
-      description: 'Grilled steak with onions and cilantro',
-      isVeg: false,
-      isSpicy: true,
-      isBestseller: true
-    },
-    // ... more menu items
+    { id: '1', imageUrl: '/menu.avif' },
+    { id: '2', imageUrl: '/menu2.avif' }
   ],
   reviews: [
     {
@@ -63,60 +58,44 @@ const mockVendor = {
 export const VendorDetails = () => {
   const [activeTab, setActiveTab] = useState<'menu' | 'photos' | 'reviews'>('menu');
   const [showGallery, setShowGallery] = useState(false);
- 
+  const { id } = useParams<{ id: string }>();
+  const vendor = mockVendor; // Assuming you fetch the vendor based on the ID
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState('');
+
+  const openModal = (image: string) => {
+    setSelectedImage(image);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      <div className="relative h-56 md:h-96">
-        <img
-          src={mockVendor.images[0]}
-          alt={mockVendor.name}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="flex justify-between items-end">
-           
-            <div className="flex justify-center text-center gap-2">
-            </div>
-          </div>
-        </div>
-      </div>
+      
+       <ImageGallery images={mockVendor.images} />
      
-      <div className="bg-white shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-4">
+      <div className="bg-white ">
+        <div className="max-w-5xl mx-auto px-4 pt-4 pb-2">
         <div className='pb-4 border-b '>
               <h1 className="text-[26px] font-bold font-Proxima text-black ">{mockVendor.name}</h1>
               <p className="text-gray-600 text-sm font-Proxima">Mexican, Street Food</p>
               <p className="text-gray-600 font-Proxima text-sm">{mockVendor.address}</p>
-            </div>
-          <div className="flex items-center justify-between pt-3">
-            <div className="flex gap-6">
-              <div>
-                <div className="flex items-center">
-                  <Star className="w-4 h-4 text-green-600 fill-current" />
-                  <span className="ml-1 font-semibold">{mockVendor.rating}</span>
-                </div>
-                <p className="text-xs text-center text-gray-600">Dining</p>
-              </div>
-              <div>
-                <div className="flex items-center">
-                  <Star className="w-4 h-4 text-green-600 fill-current" />
-                  <span className="ml-1 font-semibold">{mockVendor.deliveryRating}</span>
-                </div>
-                <p className="text-xs text-gray-600 text-center">Delivery</p>
-              </div>
-            </div>
-            <div className="text-center">
-              <p className="font-semibold">₹{mockVendor.costForTwo}</p>
-              <p className="text-xs text-gray-600">Cost for two</p>
-            </div>
-          </div>
+        </div>
+          
         </div>
       </div>
 
-      <div className="bg-white mt-2 shadow-sm">
+      <div className='max-w-5xl mx-auto pt-4 pb-2'>
+        <div className="px-4">
+          <h2 className="font-semibold mb-3 text-lg ">Description</h2>
+        </div>
+        <div className='px-4 text-sm text-gray-700 text-justify'>
+          <p>Best tacos in the city! Authentic flavors and great service. Really enjoyed the al pastor tacos. Will definitely come back! Authentic flavors and great service. Really enjoyed the al pastor tacos. WillAuthentic flavors and great service. Really enjoyed the al pastor tacos. Will</p>
+        </div>
+      </div>
+
+      <div className="bg-white mt-2 ">
         <div className="max-w-5xl mx-auto px-4 py-4">
-          <h3 className="font-semibold mb-3">More Info</h3>
+          <h2 className="font-semibold mb-3 text-lg">More Info</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-y-2">
             {Object.entries(mockVendor.features).map(([key, value]) => (
               value && (
@@ -132,14 +111,33 @@ export const VendorDetails = () => {
         </div>
       </div>
 
-      <div className="p-2">
-      <h2 className="text-xl font-Proxima font-semibold">Menu</h2>
-      <div className=' pt-3 pb-2 bg-white'>
-            <img src="/menu.avif" className=' h-32' alt="" />
+      <div className="p-2 px-4">
+        <h2 className="text-xl font-Proxima font-semibold">Menu</h2>
+        <div className='pt-3 pb-2 bg-white flex'>
+          {mockVendor.menu.map((item) => (
+            <img
+              key={item.id}
+              src={item.imageUrl}
+              className='h-32 cursor-pointer pl-4'
+              alt={`Menu item ${item.id}`}
+              onClick={() => openModal(item.imageUrl)}
+            />
+          ))}
+        </div>
       </div>
-      </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="flex justify-center items-center h-full">
+          <img
+            src={selectedImage}
+            alt="Menu"
+            className="max-h-[90vh] max-w-[90vw] object-contain"
+          />
+        </div>
+      </Modal>
+
       <div className='pb-10'>
-        <AddressSection address={mockVendor.address} coordinates={mockVendor.coordinates} />
+        <AddressSection address={mockVendor.address}/>
       </div>
 
 
