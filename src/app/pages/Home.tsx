@@ -30,7 +30,7 @@ export const Home = () => {
     const fetchCards = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:5001/api/cards`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
