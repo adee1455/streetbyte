@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface ImageGalleryProps {
-  images: string[];
+  images: { image_url: string }[];  // Adjusted the type to match your API structure
 }
 
 export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
@@ -22,7 +22,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
       <div className="relative h-56 md:h-96">
         {/* Main Image */}
         <img
-          src={images[0]}
+          src={images[0]?.image_url}
           alt="Main"
           className="w-full h-full object-cover cursor-pointer"
           onClick={() => setShowModal(true)}
@@ -41,7 +41,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                 }}
               >
                 <img
-                  src={image}
+                  src={image?.image_url}
                   alt={`Thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
@@ -56,7 +56,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                 }}
               >
                 <img
-                  src={images[4]}
+                  src={images[4]?.image_url}
                   alt="More"
                   className="w-full h-full object-cover"
                 />
@@ -90,7 +90,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
             </button>
 
             <img
-              src={images[currentImageIndex]}
+              src={images[currentImageIndex]?.image_url}
               alt={`Image ${currentImageIndex + 1}`}
               className="max-h-[90vh] max-w-[90vw] object-contain"
             />

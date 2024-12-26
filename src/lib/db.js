@@ -1,28 +1,28 @@
-const mysql = require('mysql2/promise');
+import mysql from 'mysql2/promise'; // Use the promise-based API
+import dotenv from 'dotenv';
 
-// Create a database connection pool
+dotenv.config();
+
 const pool = mysql.createPool({
-  host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
 });
 
-// Execute SQL queries using the pool
-const query = async ({ query, values }) => {
+export const query = async ({ query, values }) => {
   const connection = await pool.getConnection();
   try {
-    console.log("Db Connected");
     const [results] = await connection.execute(query, values);
-    connection.release();
     return results;
   } catch (error) {
-    console.log("Db not Connected");
-    throw Error(error.message);
+    console.error("Error executing query:", error.message);
+    throw error; // Throw the error to be caught by the caller
+  } finally {
+    connection.release();
   }
+  
 };
-
-module.exports = { query };

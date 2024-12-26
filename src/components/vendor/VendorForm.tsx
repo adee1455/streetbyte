@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, MapPin, Info, PhoneCallIcon } from 'lucide-react';
+import { Camera, MapPin, Info, PhoneCallIcon, Star, User2Icon } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { storage } from '../../lib/appwrite';
@@ -11,35 +11,35 @@ interface FormData {
   foodType: string;
   address: string;
   rating: string;
+  contact_number: string;
+  description: string;
+  created_by: string;
+}
+interface ImgData{
   images: FileList | null;
   menu: FileList | null;
-  // features: {
-  //   homeDelivery: boolean;
-  //   takeaway: boolean;
-  //   vegetarianOnly: boolean;
-  //   indoorSeating: boolean;
-  //   desserts: boolean;
-  // };
-  phoneNo: string;
-  description: string;
 }
 
 export const VendorForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     name: '',
-    foodType: '',
+    description: '',
     address: '',
+    contact_number: '',
+    rating: '',
+    foodType: '',
+    created_by: '',
+  });
+  const [ImgData,setImgData] = useState<ImgData>({
     images: null,
     menu: null,
-    rating: '',
-    phoneNo: '',
-    description: '',
   });
+
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [menuPreviews, setMenuPreviews] = useState<string[]>([]);
-
+  const id = Date.now().toString();
  
 
   
@@ -49,7 +49,7 @@ export const VendorForm = () => {
     if (!formData.name) newErrors.name = 'Name is required';
     if (!formData.foodType) newErrors.foodType = 'Food type is required';
     if (!formData.address) newErrors.address = 'Address is required';
-    if (!formData.phoneNo) newErrors.phoneNo = 'Phone number is required';
+    if (!formData.contact_number) newErrors.contact_number = 'Phone number is required';
     if (!formData.description) newErrors.description = 'Description is required';
 
     setErrors(newErrors);
@@ -62,15 +62,16 @@ export const VendorForm = () => {
     if (!validateForm()) return;
 
     const existingVendors = JSON.parse(localStorage.getItem('vendors') || '[]');
-
+   
     const newVendor = {
-      id: Date.now().toString(),
+      id,
       ...formData,
+      created_by: formData.created_by || 101,
     };
 
     // Upload vendor images
-    const vendorImageUrls = await uploadImages(formData.images);
-    const menuImageUrls = await uploadImages(formData.menu);
+    const vendorImageUrls = await uploadImages(ImgData.images);
+    const menuImageUrls = await uploadImages(ImgData.menu);
 
     // Insert vendor into the database
     await insertVendor(newVendor, vendorImageUrls, menuImageUrls);
@@ -92,7 +93,8 @@ export const VendorForm = () => {
           file
         );
         const url = response.$id;
-        urls.push(url);
+        const imgUrl = storage.getFilePreview('676ab6de002caef140d0', url)
+        urls.push(imgUrl);
       } catch (error) {
         console.error('Error uploading file:', error);
         // Handle the error as needed (e.g., show a notification)
@@ -103,39 +105,55 @@ export const VendorForm = () => {
 
   const insertVendor = async (vendor: any, vendorImageUrls: string[], menuImageUrls: string[]) => {
     // Insert vendor into the database
-    await fetch('/api/vendors', {
+    const response = await fetch('http://localhost:5001/api/vendors', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(vendor),
+      body: JSON.stringify(vendor), // Ensure no created_by field is included
     });
-
+  
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to create vendor: ${errorData.message}`);
+    }
+  
+    const vendorData = await response.json();
+    // const vendorId = vendorData.id; // Get the newly created vendor ID
+  
     // Insert vendor images
     for (const url of vendorImageUrls) {
-      await fetch('/api/vendor-images', {
+      const imageData = {
+        id: Date.now().toString(), // Generate a unique ID for the image
+        vendor_id: vendor.id, // Use the newly created vendor ID
+        image_url: url,
+      };
+      console.log('Inserting vendor image data:', imageData); // Debugging line
+  
+      await fetch('http://localhost:5001/api/vendor-images', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          vendor_id: vendor.id,
-          image_url: url,
-        }),
+        body: JSON.stringify(imageData),
       });
     }
-
+  
     // Insert menu images
     for (const url of menuImageUrls) {
-      await fetch('/api/menu-images', {
+      const menuData = {
+        id: Date.now().toString(), // Generate a unique ID for the menu item
+        vendor_id: vendor.id, // Use the newly created vendor ID
+        image_url: url,
+      };
+      console.log('Inserting menu image data:', menuData); // Debugging line
+  
+      await fetch('http://localhost:5001/api/menu-images', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          vendor_id: vendor.id,
-          image_url: url,
-        }),
+        body: JSON.stringify(menuData),
       });
     }
   };
@@ -165,7 +183,7 @@ export const VendorForm = () => {
             onChange={(e) => {
               const files = e.target.files;
               if (files) {
-                setFormData((prevData) => ({
+                setImgData((prevData) => ({
                   ...prevData,
                   images: files,
                 }));
@@ -225,12 +243,31 @@ export const VendorForm = () => {
         label="Phone Number"
         icon={<PhoneCallIcon className="w-4 h-4" />}
         placeholder='Phone No.'
-        value={formData.phoneNo}
-        onChange={(e) => setFormData({ ...formData, phoneNo: e.target.value })}
-        error={errors.phoneNo}
+        value={formData.contact_number}
+        onChange={(e) => setFormData({ ...formData, contact_number: e.target.value })}
+        error={errors.contact_number}
+        required
+      />
+      
+      <Input
+        label="rating"
+        icon={<Star className="w-5 h-5" />}
+        placeholder='Rating'
+        value={formData.rating}
+        onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
+        error={errors.rating}
         required
       />
 
+      <Input
+        label="createdby"
+        icon={<User2Icon className="w-5 h-5" />}
+        placeholder='Your Name'
+        value={formData.created_by}
+        onChange={(e) => setFormData({ ...formData, created_by: e.target.value })}
+        error={errors.created_by}
+        required
+      />
         <div>
                <label className="block text-sm font-medium text-gray-700 mb-2">
 
@@ -260,7 +297,10 @@ export const VendorForm = () => {
             onChange={(e) => {
               const files = e.target.files;
               if (files) {
-                setFormData({ ...formData, menu: files });
+                setImgData((prevData) => ({
+                  ...prevData,
+                  menu: files,
+                }));
                 const newMenuPreviews = Array.from(files).map(file => URL.createObjectURL(file));
                 setMenuPreviews((prevPreviews) => [...prevPreviews, ...newMenuPreviews]);
               }

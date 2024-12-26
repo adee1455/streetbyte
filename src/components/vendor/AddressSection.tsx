@@ -13,8 +13,9 @@ const mapContainerStyle = {
 
 export const AddressSection: React.FC<AddressSectionProps> = ({ address }) => {
   const [geocodeCoordinates, setGeocodeCoordinates] = useState<{ lat: number; lng: number } | null>(null);
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: "AIzaSyDnFERa1oyGkz3C8hWtPWi0UGtx1iD1FxM", // Replace with your API key
+  const [error, setError] = useState<string | null>(null);
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "AIzaSyDnFERa1oyGkz3C8hWtPWi0UGtx1iD1FxM", // Use environment variable
   });
 
   useEffect(() => {
@@ -25,17 +26,25 @@ export const AddressSection: React.FC<AddressSectionProps> = ({ address }) => {
           if (status === "OK" && results[0]) {
             const { lat, lng } = results[0].geometry.location;
             setGeocodeCoordinates({ lat: lat(), lng: lng() });
+            setError(null); // Reset error if geocoding is successful
           } else {
-            console.error("Geocode was not successful for the following reason: " + status);
+            setError(`Geocode was not successful for the following reason: ${status}`);
+            console.error("Geocode failed:", status);
           }
         });
       } else {
-        console.warn("Invalid address provided for geocoding.");
+        setError("Invalid address provided for geocoding.");
       }
     };
 
-    geocodeAddress();
-  }, [address]);
+    if (isLoaded) {
+      geocodeAddress();
+    }
+  }, [address, isLoaded]);
+
+  if (loadError) {
+    return <div>Error loading Google Maps</div>;
+  }
 
   return (
     <div className="bg-white shadow-sm mt-3">
@@ -45,8 +54,9 @@ export const AddressSection: React.FC<AddressSectionProps> = ({ address }) => {
           <MapPin className="w-5 h-5 text-gray-500 mt-1" />
           <p className="text-gray-700">{address}</p>
         </div>
+        {error && <p className="text-red-500 mb-4">{error}</p>} {/* Error message */}
         <div className="h-52 focus:outline-none rounded-lg overflow-hidden">
-          {isLoaded && geocodeCoordinates && (
+          {isLoaded && geocodeCoordinates ? (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
               zoom={14}
@@ -54,6 +64,8 @@ export const AddressSection: React.FC<AddressSectionProps> = ({ address }) => {
             >
               <Marker position={geocodeCoordinates} />
             </GoogleMap>
+          ) : (
+            !isLoaded && !error && <div>Loading map...</div> // Show loading text while waiting for map to load
           )}
         </div>
       </div>

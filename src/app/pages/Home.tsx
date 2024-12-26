@@ -3,39 +3,56 @@ import { Search } from 'lucide-react';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { CategoryScroll } from '../../components/home/CategoryScroll';
-import { VendorCard } from '../../components/home/VendorCard';
+import VendorCard from '../../components/home/VendorCard';
 import { Navigation } from '../../components/layout/Navigation';
 import { LocationHeader } from '../../components/home/LocationHeader';
 import { FloatingActionButton } from '../../components/home/FloatingActionButton';
+import { useEffect,useState } from 'react';
 
-const mockVendors = [
-  {
-    id: '1',
-    name: 'Street Taco Express',
-    description: 'Authentic Mexican street tacos',
-    address: 'Food Street, Downtown',
-    cuisineType: ['Mexican', 'Street Food'],
-    rating: 4.5,
-    pno: 8767564998,
-    images: ['https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&q=80&w=800'],
-    menu: [],
-    reviews: []
-  },
-  {
-    id: '2',
-    name: 'Dim Sum Paradise',
-    description: 'Traditional Chinese street food',
-    address: 'China Town, City Center',
-    cuisineType: ['Chinese', 'Dim Sum'],
-    rating: 4.8,
-    pno: 9876543210,
-    images: ['https://images.unsplash.com/photo-1455279032140-49a4bf46f343?auto=format&fit=crop&q=80&w=800'],
-    menu: [],
-    reviews: []
-  }
-];
+interface Card {
+  id: string;
+  name: string;
+  description: string;
+  address: string;
+  contact_number: string;
+  rating: string; // Keep as string since the API returns it as a string
+  foodType: string;
+  images: string[];
+  menu: string[];
+}
+
 
 export const Home = () => {
+  const [cards, setCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCards = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`http://localhost:5001/api/cards`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+          console.error("Response was not JSON:", text);
+          throw new TypeError("Oops, we haven't got JSON!");
+        }
+        const data = await response.json();
+        setCards(data);
+      } catch (error) {
+        console.error("Error fetching cards:", error);
+        setCards([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchCards();
+  }, []);
+
   return (
     <div className="pb-16 md:pb-0">
       {/* Header */}
@@ -63,9 +80,15 @@ export const Home = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {mockVendors.map((vendor) => (
-            <VendorCard key={vendor.id} vendor={vendor} />
-          ))}
+          {loading ? (
+            <div>Loading...</div>
+          ) : (
+            cards.map((card, index) => (
+              <VendorCard key={index} 
+              vendor={card}
+              />
+            ))
+          )}
         </div>
       </div>
       <FloatingActionButton />

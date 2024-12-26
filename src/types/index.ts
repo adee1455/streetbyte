@@ -21,18 +21,13 @@ export interface Vendor {
 
 export interface MenuItem {
   id: string;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
+  image_url: string;
 }
 
 export interface Review {
   id: string;
-  userId: string;
-  userName: string;
+  user_id: string;
   rating: number;
   comment: string;
-  images?: string[];
-  date: string;
+  created_at: string;
 }

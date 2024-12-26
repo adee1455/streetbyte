@@ -1,13 +1,27 @@
-import { NextResponse } from 'next/server';
-import { query } from '../../lib/db';
+import express from 'express';
+import { query } from '../../lib/db.js'; // Adjust the path as necessary
 
-export const POST = async (req) => {
-  const vendor = await req.json();
-  // Insert vendor into the database
-  await query({
-    query: "INSERT INTO vendors (id, name, description, address, contact_number, rating, foodType) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    values: [vendor.id, vendor.name, vendor.description, vendor.address, vendor.contact_number, vendor.rating, vendor.foodType],
-  });
+const router = express.Router();
 
-  return NextResponse.json({ message: 'Vendor added successfully' });
-};
+router.post('/', async (req, res) => {
+  const { id, vendor_id, image_url } = req.body;
+
+  // Check for undefined values
+  if (!id || !vendor_id || !image_url) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    await query({
+      query: "INSERT INTO VendorImages (id, vendor_id, image_url) VALUES (?, ?, ?)",
+      values: [id, vendor_id, image_url],
+    });
+
+    return res.json({ message: 'Image added successfully' });
+  } catch (error) {
+    console.error('Error adding vendor image:', error);
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+export default router;

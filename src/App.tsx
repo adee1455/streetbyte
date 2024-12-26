@@ -5,7 +5,7 @@ import { Header } from './components/Header';
 import { Login } from './app/pages/Login';
 import { Home } from './app/pages/Home';
 import { Profile } from './app/pages/Profile';
-import { VendorDetails } from './app/pages/VendorDetails';
+import VendorDetails from './app/pages/VendorDetails';
 import Feed from './app/pages/Feed';
 import Videos from './app/pages/Videos';
 import { VendorForm } from './components/vendor/VendorForm';
