@@ -30,8 +30,8 @@ import vendorRoute from './src/app/api/vendorPage/route.js'
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/vendor-images', vendorImagesRoutes);
 app.use('/api/menu-images', menuImagesRoutes);
-app.use(cardsRoute); // Add cards route
-app.use(vendorRoute)
+app.use('/api/cards',cardsRoute); // Add cards route
+app.use('/api/vendorPage',vendorRoute)
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
